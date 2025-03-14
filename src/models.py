@@ -3,7 +3,7 @@ import sys
 from sqlalchemy.orm import declarative_base, Mapped, mapped_column, relationship
 from sqlalchemy import create_engine, String, ForeignKey
 from eralchemy2 import render_er
-from sqlalchemy import Column, Integer, String, DateTime, Float
+from sqlalchemy import Column, Integer, String, DateTime, Float, Boolean, ForeignKey
 from datetime import datetime, timezone
 
 Base = declarative_base()
@@ -17,22 +17,26 @@ class User(Base):
     email = Column(String(80), nullable=False, unique=True)
     created_at = Column(DateTime(), default=datetime.now(timezone.utc))
 
+    favorites = relationship('Favorite', backref='user', lazy=True)
+
 class Planet(Base):
     __tablename__ = 'planet'
 
-    id = Column(Integer(), primary_key=True)
+    id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
     created_at = Column(DateTime(), default=datetime.now(timezone.utc))
     climate = Column(String(50), nullable=False)
     terrain = Column(String(50), nullable=False)
-    population = Column(String(50), nullable=False)
-    diameter = Column(String(50), nullable=False)
-    rotation_period = Column(String(50), nullable=False)
-    orbital_period = Column(String(50), nullable=False)
-    gravity = Column(String(50), nullable=False)
-    surface_water = Column(String(50), nullable=False)
-    moons = Column(String(50), nullable=False)
-   
+    population = Column(Integer, nullable=False) 
+    diameter = Column(Integer, nullable=False)       # Diámetro en km
+    rotation_period = Column(Integer, nullable=False)  
+    orbital_period = Column(Integer, nullable=False)  
+    gravity = Column(Float, nullable=False)  
+    surface_water = Column(Integer, nullable=False)  # % de agua en la superficie
+    moons = Column(Integer, nullable=False)
+
+    favorites = relationship('Favorite', backref='planet', lazy=True)
+    residents = relationship("Person", back_populates="homeworld")  # Relación con Person
 
 class Vehicle(Base):
     __tablename__ = 'vehicle'  
@@ -52,24 +56,42 @@ class Vehicle(Base):
     fuel_type = Column(String(50), nullable=False)
     created_at = Column(DateTime(), default=datetime.now(timezone.utc))
 
+    favorites = relationship('Favorite', backref='vehicle', lazy=True)
 
 class Person(Base):
     __tablename__ = 'person'
-    id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(nullable=False)
-    addresses: Mapped[list["Address"]] = relationship(back_populates="person")
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50), nullable=False)
+    birth_year = Column(String(50), nullable=False)
+    gender = Column(String(50), nullable=False)
+    species = Column(String(50), nullable=False)
+
+    homeworld_id = Column(Integer, ForeignKey('planet.id'), nullable=False)  # Relación con Planet
+    
+    mass = Column(Float, nullable=False)
+    skin_color = Column(String(50), nullable=False)
+    hair_color = Column(String(50), nullable=False)
+    eye_color = Column(String(50), nullable=False)
+    affiliation = Column(String(50), nullable=False)
+    force_sensitive = Column(Boolean, nullable=False, default=False)
+    created_at = Column(DateTime(), default=datetime.now(timezone.utc))
+    #homeworld_id coincida con un id de la tabla planet
+    homeworld_id = Column(Integer, ForeignKey('planet.id'), nullable=False)
+    homeworld = relationship("Planet", back_populates="residents")
+
+    favorites = relationship('Favorite', backref='person', lazy=True)
+    
 
 
-class Address(Base):
-    __tablename__ = 'address'
-    # Here we define columns for the table address.
-    # Notice that each column is also a normal Python instance attribute.
-    id: Mapped[int] = mapped_column(primary_key=True)
-    street_name: Mapped[str]
-    street_number: Mapped[str]
-    post_code: Mapped[str] = mapped_column(nullable=False)
-    person_id: Mapped[int] = mapped_column(ForeignKey("person.id"))
-    person: Mapped["Person"] = relationship(back_populates="address")
+class Favorite(Base):
+    __tablename__ = 'favorite'
+    
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    people_id = Column(Integer, ForeignKey('person.id'), nullable=True)
+    vehicle_id = Column(Integer, ForeignKey('vehicle.id'), nullable=True)
+    planet_id = Column(Integer, ForeignKey('planet.id'), nullable=True)
 
     def to_dict(self):
         return {}
