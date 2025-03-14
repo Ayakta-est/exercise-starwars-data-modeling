@@ -3,16 +3,48 @@ import sys
 from sqlalchemy.orm import declarative_base, Mapped, mapped_column, relationship
 from sqlalchemy import create_engine, String, ForeignKey
 from eralchemy2 import render_er
+from sqlalchemy import Column, Integer, String, DateTime
+from datetime import datetime, timezone
 
 Base = declarative_base()
 
+class User(Base):
+    __tablename__ = 'usuario'
+
+    id = Column(Integer(), primary_key=True)
+    username = Column(String(30), nullable=False, unique=True) #30 caracteres,obligatorio un valor y único
+    password = Column(String(30), nullable=False)
+    email = Column(String(80), nullable=False, unique=True)
+    created_at = Column(DateTime(), default=datetime.now(timezone.utc))
+
+class Planet(Base):
+    __tablename__ = 'planeta'
+
+    id = Column(Integer(), primary_key=True)
+    name = Column(String(50), nullable=False)
+    created_at = Column(DateTime(), default=datetime.now(timezone.utc))
+    climate = Column(String(50), nullable=False)
+    terrain = Column(String(50), nullable=False)
+    population = Column(String(50), nullable=False)
+    diameter = Column(String(50), nullable=False)
+    rotation_period = Column(String(50), nullable=False)
+    orbital_period = Column(String(50), nullable=False)
+    gravity = Column(String(50), nullable=False)
+    surface_water = Column(String(50), nullable=False)
+
+class Vehicle(Base):
+    __tablename__ = 'vehículos'
+
+    id = Column(Integer(), primary_key=True)
+    name = Column(String(50), nullable=False)
+    created_at = Column(DateTime(), default=datetime.now(timezone.utc))
+
+
 class Person(Base):
     __tablename__ = 'person'
-    # Here we define columns for the table person
-    # Notice that each column is also a normal Python instance attribute.
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(nullable=False)
-    address: Mapped["Address"] = relationship(back_populates="person")
+    addresses: Mapped[list["Address"]] = relationship(back_populates="person")
 
 
 class Address(Base):
