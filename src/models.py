@@ -3,13 +3,13 @@ import sys
 from sqlalchemy.orm import declarative_base, Mapped, mapped_column, relationship
 from sqlalchemy import create_engine, String, ForeignKey
 from eralchemy2 import render_er
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, Float
 from datetime import datetime, timezone
 
 Base = declarative_base()
 
 class User(Base):
-    __tablename__ = 'usuario'
+    __tablename__ = 'user'
 
     id = Column(Integer(), primary_key=True)
     username = Column(String(30), nullable=False, unique=True) #30 caracteres,obligatorio un valor y único
@@ -18,7 +18,7 @@ class User(Base):
     created_at = Column(DateTime(), default=datetime.now(timezone.utc))
 
 class Planet(Base):
-    __tablename__ = 'planeta'
+    __tablename__ = 'planet'
 
     id = Column(Integer(), primary_key=True)
     name = Column(String(50), nullable=False)
@@ -31,12 +31,25 @@ class Planet(Base):
     orbital_period = Column(String(50), nullable=False)
     gravity = Column(String(50), nullable=False)
     surface_water = Column(String(50), nullable=False)
+    moons = Column(String(50), nullable=False)
+   
 
 class Vehicle(Base):
-    __tablename__ = 'vehículos'
+    __tablename__ = 'vehicle'  
 
-    id = Column(Integer(), primary_key=True)
+    id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
+    model = Column(String(50), nullable=False)
+    manufacturer = Column(String(50), nullable=False)
+    vehicle_class = Column(String(50), nullable=False)
+    crew = Column(Integer, nullable=False)  # Personas necesarias para conducirlo
+    passengers = Column(Integer, nullable=False)  
+    max_speed = Column(Float, nullable=False)  
+    length = Column(Float, nullable=False)  # Longitud del vehículo
+    weight = Column(Float, nullable=False) 
+    cargo_capacity = Column(Float, nullable=False) 
+    consumables = Column(String(50), nullable=False)  # Duración del suministro
+    fuel_type = Column(String(50), nullable=False)
     created_at = Column(DateTime(), default=datetime.now(timezone.utc))
 
 
